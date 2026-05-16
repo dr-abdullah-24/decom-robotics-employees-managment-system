@@ -29,7 +29,7 @@ export default function AdminDashboard() {
           .select('*, profiles(full_name, employee_id, department)')
           .order('created_at', { ascending: false }).limit(5),
         supabase.from('leaves')
-          .select('*, profiles(full_name, employee_id)')
+          .select('*, employee:profiles!employee_id(full_name, employee_id)')
           .eq('status', 'pending')
           .order('created_at', { ascending: false }).limit(5),
       ])
@@ -128,11 +128,11 @@ export default function AdminDashboard() {
                 <div key={leave.id} className="flex items-center gap-3 py-2 border-b border-gray-50 last:border-0">
                   <div className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
                     <span className="text-amber-700 text-xs font-bold">
-                      {leave.profiles?.full_name?.charAt(0)}
+                      {leave.employee?.full_name?.charAt(0)}
                     </span>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900 truncate">{leave.profiles?.full_name}</p>
+                    <p className="text-sm font-medium text-gray-900 truncate">{leave.employee?.full_name}</p>
                     <p className="text-xs text-gray-500">
                       {format(new Date(leave.start_date), 'MMM d')}
                       {leave.start_date !== leave.end_date ? ` – ${format(new Date(leave.end_date), 'MMM d')}` : ''}

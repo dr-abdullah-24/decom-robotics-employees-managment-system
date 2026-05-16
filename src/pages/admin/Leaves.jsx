@@ -25,7 +25,7 @@ export default function AdminLeaves() {
     setLoading(true)
     const [leavesRes, countsRes] = await Promise.all([
       supabase.from('leaves')
-        .select('*, profiles(full_name, employee_id, department, employment_date)')
+        .select('*, employee:profiles!employee_id(full_name, employee_id, department, employment_date)')
         .eq('status', filter)
         .order('created_at', { ascending: false }),
       supabase.from('leaves').select('status'),
@@ -153,11 +153,11 @@ export default function AdminLeaves() {
                     <td className="table-cell">
                       <div className="flex items-center gap-2.5">
                         <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
-                          <span className="text-blue-700 text-xs font-bold">{leave.profiles?.full_name?.charAt(0)}</span>
+                          <span className="text-blue-700 text-xs font-bold">{leave.employee?.full_name?.charAt(0)}</span>
                         </div>
                         <div>
-                          <p className="font-medium text-sm text-gray-900">{leave.profiles?.full_name}</p>
-                          <p className="text-xs text-gray-500">{leave.profiles?.department}</p>
+                          <p className="font-medium text-sm text-gray-900">{leave.employee?.full_name}</p>
+                          <p className="text-xs text-gray-500">{leave.employee?.department}</p>
                         </div>
                       </div>
                     </td>
