@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { Eye, EyeOff, Lock, Mail } from 'lucide-react'
@@ -9,19 +9,31 @@ export default function Login() {
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
-  const { signIn } = useAuth()
+  const { signIn, user, profile } = useAuth()
   const navigate = useNavigate()
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (user && profile) {
+      if (profile.must_change_password) {
+        navigate('/setup-password', { replace: true })
+      } else if (profile.role === 'admin') {
+        navigate('/admin', { replace: true })
+      } else {
+        navigate('/employee', { replace: true })
+      }
+    }
+  }, [user, profile])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     if (!email || !password) return toast.error('Please fill in all fields')
     setLoading(true)
     try {
-      const { user } = await signIn(email, password)
-      // Navigation handled by AuthContext + App routing
+      await signIn(email, password)
+      // useEffect above will handle navigation once profile loads
     } catch (err) {
       toast.error(err.message || 'Invalid email or password')
-    } finally {
       setLoading(false)
     }
   }
@@ -88,9 +100,9 @@ export default function Login() {
               disabled={loading}
               className="btn-primary w-full py-2.5 flex items-center justify-center gap-2"
             >
-              {loading ? (
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              ) : 'Sign In'}
+              {loading
+                ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                : 'Sign In'}
             </button>
           </form>
 
