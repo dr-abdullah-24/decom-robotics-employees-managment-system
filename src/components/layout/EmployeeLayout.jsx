@@ -36,7 +36,7 @@ export default function EmployeeLayout() {
               className="h-9 w-9 object-contain flex-shrink-0"
             />
             <div>
-              <p className="text-white font-bold text-sm leading-tight">Decom Robotics</p>
+              <p className="text-white font-bold text-sm leading-tight">DR EMS</p>
               <p className="text-slate-400 text-xs">Employee Portal</p>
             </div>
           </div>

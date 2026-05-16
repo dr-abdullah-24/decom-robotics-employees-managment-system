@@ -37,7 +37,7 @@ export default function Login() {
             className="h-20 mx-auto mb-4 object-contain drop-shadow-lg"
           />
           <h1 className="text-2xl font-bold text-white">Decom Robotics</h1>
-          <p className="text-slate-400 text-sm mt-1">Employee Management System</p>
+          <p className="text-slate-400 text-sm mt-1">DR EMS</p>
         </div>
 
         {/* Card */}
@@ -100,7 +100,7 @@ export default function Login() {
         </div>
 
         <p className="text-center text-slate-500 text-xs mt-6">
-          © {new Date().getFullYear()} Decom Robotics. All rights reserved.
+          © {new Date().getFullYear()} Decom Robotics · DR EMS
         </p>
       </div>
     </div>
