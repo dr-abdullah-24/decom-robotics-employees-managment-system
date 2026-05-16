@@ -49,17 +49,16 @@ export default function EmployeeAttendance() {
       const min = now.getMinutes()
       const isLate = hour > LATE_THRESHOLD_HOUR || (hour === LATE_THRESHOLD_HOUR && min > LATE_THRESHOLD_MIN)
 
-      const { data, error } = await supabase.from('attendance').upsert({
+      const { error } = await supabase.from('attendance').upsert({
         employee_id: profile.id,
         date: today,
         check_in: now.toISOString(),
         status: isLate ? 'late' : 'present',
-      }, { onConflict: 'employee_id,date' }).select().single()
+      }, { onConflict: 'employee_id,date' })
 
       if (error) throw error
-      setTodayAtt(data)
       toast.success(`Checked in at ${format(now, 'h:mm a')}${isLate ? ' (Late)' : ''}`)
-      fetchData()
+      await fetchData()
     } catch (e) {
       toast.error(e.message)
     } finally {
@@ -76,15 +75,14 @@ export default function EmployeeAttendance() {
       const mins = differenceInMinutes(now, checkIn)
       const hours = Math.round((mins / 60) * 10) / 10
 
-      const { data, error } = await supabase.from('attendance').update({
+      const { error } = await supabase.from('attendance').update({
         check_out: now.toISOString(),
         working_hours: hours,
-      }).eq('id', todayAtt.id).select().single()
+      }).eq('id', todayAtt.id)
 
       if (error) throw error
-      setTodayAtt(data)
       toast.success(`Checked out at ${format(now, 'h:mm a')} · ${hours}h worked`)
-      fetchData()
+      await fetchData()
     } catch (e) {
       toast.error(e.message)
     } finally {
