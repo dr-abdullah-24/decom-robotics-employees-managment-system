@@ -21,6 +21,15 @@ import EmployeeLeaves from './pages/employee/Leaves'
 import EmployeeDocuments from './pages/employee/Documents'
 import EmployeeProfile from './pages/employee/Profile'
 
+const Spinner = () => (
+  <div className="min-h-screen flex items-center justify-center bg-gray-50">
+    <div className="text-center">
+      <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+      <p className="text-gray-500 text-sm">Loading...</p>
+    </div>
+  </div>
+)
+
 function ProtectedRoute({ children, requiredRole }) {
   const { user, profile, loading } = useAuth()
 
@@ -44,10 +53,11 @@ function ProtectedRoute({ children, requiredRole }) {
 
 function RootRedirect() {
   const { user, profile, loading } = useAuth()
-  if (loading) return null
+  if (loading) return <Spinner />
   if (!user) return <Navigate to="/login" replace />
-  if (profile?.must_change_password) return <Navigate to="/setup-password" replace />
-  if (profile?.role === 'admin') return <Navigate to="/admin" replace />
+  if (!profile) return <Spinner />
+  if (profile.must_change_password) return <Navigate to="/setup-password" replace />
+  if (profile.role === 'admin') return <Navigate to="/admin" replace />
   return <Navigate to="/employee" replace />
 }
 
