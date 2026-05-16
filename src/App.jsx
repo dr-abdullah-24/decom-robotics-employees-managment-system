@@ -1,5 +1,6 @@
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './context/AuthContext'
+import { supabaseConfigured } from './lib/supabase'
 
 import Login from './pages/Login'
 import SetupPassword from './pages/SetupPassword'
@@ -50,7 +51,30 @@ function RootRedirect() {
   return <Navigate to="/employee" replace />
 }
 
+function NotConfigured() {
+  return (
+    <div className="min-h-screen bg-slate-900 flex items-center justify-center p-6">
+      <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full text-center">
+        <img src={`${import.meta.env.BASE_URL}logo.png`} alt="Decom Robotics" className="h-16 mx-auto mb-4 object-contain" />
+        <h1 className="text-xl font-bold text-gray-900 mb-2">Setup Required</h1>
+        <p className="text-gray-500 text-sm mb-5">
+          The Supabase environment variables are not configured. Add them to GitHub repository secrets to deploy.
+        </p>
+        <div className="bg-gray-50 rounded-xl p-4 text-left text-xs font-mono space-y-1 text-gray-700">
+          <p>VITE_SUPABASE_URL=https://xxx.supabase.co</p>
+          <p>VITE_SUPABASE_ANON_KEY=your-anon-key</p>
+        </div>
+        <p className="text-xs text-gray-400 mt-4">
+          GitHub repo → Settings → Secrets and variables → Actions
+        </p>
+      </div>
+    </div>
+  )
+}
+
 export default function App() {
+  if (!supabaseConfigured) return <NotConfigured />
+
   return (
     <AuthProvider>
       <HashRouter>

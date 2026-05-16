@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import { Eye, EyeOff, Bot, ShieldCheck } from 'lucide-react'
+import { Eye, EyeOff, ShieldCheck } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 export default function SetupPassword() {
@@ -45,9 +45,11 @@ export default function SetupPassword() {
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-blue-500/30">
-            <Bot size={32} className="text-white" />
-          </div>
+          <img
+            src={`${import.meta.env.BASE_URL}logo.png`}
+            alt="Decom Robotics"
+            className="h-20 mx-auto mb-4 object-contain drop-shadow-lg"
+          />
           <h1 className="text-2xl font-bold text-white">Decom Robotics</h1>
           <p className="text-slate-400 text-sm mt-1">Employee Management System</p>
         </div>

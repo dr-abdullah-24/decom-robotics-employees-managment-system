@@ -2,7 +2,7 @@ import { Outlet, NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import {
   LayoutDashboard, Users, Clock, CalendarDays, DollarSign,
-  LogOut, ChevronRight, Bot, Bell
+  LogOut, ChevronRight
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 
@@ -29,11 +29,13 @@ export default function AdminLayout() {
       {/* Sidebar */}
       <aside className="w-64 bg-slate-900 flex flex-col flex-shrink-0">
         {/* Logo */}
-        <div className="px-5 py-5 border-b border-slate-700">
+        <div className="px-5 py-4 border-b border-slate-700">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 bg-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
-              <Bot size={20} className="text-white" />
-            </div>
+            <img
+              src={`${import.meta.env.BASE_URL}logo.png`}
+              alt="Decom Robotics"
+              className="h-9 w-9 object-contain flex-shrink-0"
+            />
             <div>
               <p className="text-white font-bold text-sm leading-tight">Decom Robotics</p>
               <p className="text-slate-400 text-xs">Admin Portal</p>
