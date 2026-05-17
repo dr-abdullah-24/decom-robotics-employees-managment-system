@@ -3,6 +3,12 @@ import { supabase } from '../lib/supabase'
 
 const AuthContext = createContext(null)
 
+const withTimeout = (promise, ms = 6000) =>
+  Promise.race([
+    promise,
+    new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), ms)),
+  ])
+
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
   const [profile, setProfile] = useState(null)
@@ -10,11 +16,9 @@ export function AuthProvider({ children }) {
 
   const fetchProfile = async (userId) => {
     try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .single()
+      const { data, error } = await withTimeout(
+        supabase.from('profiles').select('*').eq('id', userId).single()
+      )
       if (!error && data) {
         setProfile(data)
         return data
@@ -25,21 +29,10 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     let mounted = true
-    let loadingDone = false
-
-    const finishLoading = () => {
-      if (mounted && !loadingDone) {
-        loadingDone = true
-        setLoading(false)
-      }
-    }
-
-    // Safety net: never stay on loading screen more than 8 seconds
-    const timer = setTimeout(finishLoading, 8000)
 
     const init = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession()
+        const { data: { session } } = await withTimeout(supabase.auth.getSession(), 5000)
         if (!mounted) return
         if (session?.user) {
           setUser(session.user)
@@ -47,8 +40,7 @@ export function AuthProvider({ children }) {
         }
       } catch (_) {
       } finally {
-        clearTimeout(timer)
-        finishLoading()
+        if (mounted) setLoading(false)
       }
     }
 
@@ -63,20 +55,19 @@ export function AuthProvider({ children }) {
         setUser(null)
         setProfile(null)
       }
-      // Also clear loading in case init() is still pending when INITIAL_SESSION fires
-      clearTimeout(timer)
-      finishLoading()
     })
 
     return () => {
       mounted = false
-      clearTimeout(timer)
       subscription.unsubscribe()
     }
   }, [])
 
   const signIn = async (email, password) => {
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password })
+    const { data, error } = await withTimeout(
+      supabase.auth.signInWithPassword({ email, password }),
+      10000
+    )
     if (error) throw error
     const userProfile = await fetchProfile(data.user.id)
     return { user: data.user, profile: userProfile }

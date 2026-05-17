@@ -32,7 +32,7 @@ const Spinner = () => (
 )
 
 function ProtectedRoute({ children, requiredRole }) {
-  const { user, profile, loading } = useAuth()
+  const { user, profile, loading, refreshProfile } = useAuth()
 
   if (loading) return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -43,7 +43,17 @@ function ProtectedRoute({ children, requiredRole }) {
     </div>
   )
 
-  if (!user || !profile) return <Navigate to="/login" replace />
+  if (!user) return <Navigate to="/login" replace />
+
+  if (!profile) return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="text-center">
+        <p className="text-gray-500 text-sm mb-3">Could not load profile. Check your connection.</p>
+        <button onClick={refreshProfile} className="text-blue-600 text-sm underline">Retry</button>
+      </div>
+    </div>
+  )
+
   if (profile.must_change_password) return <Navigate to="/setup-password" replace />
   if (requiredRole && profile.role !== requiredRole) {
     return <Navigate to={profile.role === 'admin' ? '/admin' : '/employee'} replace />
