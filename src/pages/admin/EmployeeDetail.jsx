@@ -4,7 +4,7 @@ import { supabase } from '../../lib/supabase'
 import { format, differenceInYears, differenceInMonths, addYears, subYears } from 'date-fns'
 import {
   ArrowLeft, Edit2, Save, X, User, Briefcase, DollarSign,
-  Clock, CalendarDays, FileText, Mail, Phone, Building2, Calendar
+  Clock, CalendarDays, FileText, Mail, Phone, Building2, Calendar, KeyRound, Eye, EyeOff
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 
@@ -52,6 +52,10 @@ export default function AdminEmployeeDetail() {
   const [editForm, setEditForm] = useState({})
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [resetModal, setResetModal] = useState(false)
+  const [resetPassword, setResetPassword] = useState('')
+  const [showResetPassword, setShowResetPassword] = useState(false)
+  const [resetting, setResetting] = useState(false)
 
   useEffect(() => { fetchAll() }, [id])
 
@@ -92,6 +96,32 @@ export default function AdminEmployeeDetail() {
       toast.error(e.message)
     } finally {
       setSaving(false)
+    }
+  }
+
+  const handleResetPassword = async () => {
+    if (!resetPassword || resetPassword.length < 6) return toast.error('Password must be at least 6 characters')
+    setResetting(true)
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/reset-employee-password`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
+          'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
+        },
+        body: JSON.stringify({ userId: id, newPassword: resetPassword }),
+      })
+      const result = await res.json()
+      if (!res.ok) throw new Error(result.error || 'Failed to reset password')
+      toast.success('Password reset. Employee must change it on next login.')
+      setResetModal(false)
+      setResetPassword('')
+    } catch (e) {
+      toast.error(e.message)
+    } finally {
+      setResetting(false)
     }
   }
 
@@ -158,7 +188,10 @@ export default function AdminEmployeeDetail() {
                   </button>
                 </>
               ) : (
-                <button onClick={() => setEditing(true)} className="btn-secondary flex items-center gap-1.5"><Edit2 size={14} />Edit</button>
+                <>
+                  <button onClick={() => { setResetModal(true); setResetPassword(''); setShowResetPassword(false) }} className="btn-secondary flex items-center gap-1.5"><KeyRound size={14} />Reset Password</button>
+                  <button onClick={() => setEditing(true)} className="btn-secondary flex items-center gap-1.5"><Edit2 size={14} />Edit</button>
+                </>
               )}
             </div>
           </div>
@@ -392,6 +425,44 @@ export default function AdminEmployeeDetail() {
               ))}
             </div>
           )}
+        </div>
+      )}
+
+      {/* Reset Password Modal */}
+      {resetModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">Reset Password</h3>
+              <button onClick={() => setResetModal(false)} className="text-gray-400 hover:text-gray-600"><X size={20} /></button>
+            </div>
+            <p className="text-sm text-gray-500 mb-4">
+              Set a temporary password for <span className="font-medium text-gray-700">{employee.full_name}</span>. They will be required to change it on next login.
+            </p>
+            <div className="relative mb-4">
+              <input
+                type={showResetPassword ? 'text' : 'password'}
+                value={resetPassword}
+                onChange={e => setResetPassword(e.target.value)}
+                placeholder="New temporary password"
+                className="input pr-10"
+              />
+              <button
+                type="button"
+                onClick={() => setShowResetPassword(s => !s)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              >
+                {showResetPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
+            </div>
+            <div className="flex gap-2">
+              <button onClick={() => setResetModal(false)} className="btn-secondary flex-1">Cancel</button>
+              <button onClick={handleResetPassword} disabled={resetting} className="btn-primary flex-1 flex items-center justify-center gap-2">
+                {resetting ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <KeyRound size={14} />}
+                Reset
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
