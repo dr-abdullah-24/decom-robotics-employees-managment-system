@@ -25,6 +25,34 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     let mounted = true
+    let loadingDone = false
+
+    const finishLoading = () => {
+      if (mounted && !loadingDone) {
+        loadingDone = true
+        setLoading(false)
+      }
+    }
+
+    // Safety net: never stay on loading screen more than 8 seconds
+    const timer = setTimeout(finishLoading, 8000)
+
+    const init = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession()
+        if (!mounted) return
+        if (session?.user) {
+          setUser(session.user)
+          await fetchProfile(session.user.id)
+        }
+      } catch (_) {
+      } finally {
+        clearTimeout(timer)
+        finishLoading()
+      }
+    }
+
+    init()
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (!mounted) return
@@ -35,11 +63,14 @@ export function AuthProvider({ children }) {
         setUser(null)
         setProfile(null)
       }
-      setLoading(false)
+      // Also clear loading in case init() is still pending when INITIAL_SESSION fires
+      clearTimeout(timer)
+      finishLoading()
     })
 
     return () => {
       mounted = false
+      clearTimeout(timer)
       subscription.unsubscribe()
     }
   }, [])

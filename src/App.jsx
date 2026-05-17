@@ -43,10 +43,10 @@ function ProtectedRoute({ children, requiredRole }) {
     </div>
   )
 
-  if (!user) return <Navigate to="/login" replace />
-  if (profile?.must_change_password) return <Navigate to="/setup-password" replace />
-  if (requiredRole && profile?.role !== requiredRole) {
-    return <Navigate to={profile?.role === 'admin' ? '/admin' : '/employee'} replace />
+  if (!user || !profile) return <Navigate to="/login" replace />
+  if (profile.must_change_password) return <Navigate to="/setup-password" replace />
+  if (requiredRole && profile.role !== requiredRole) {
+    return <Navigate to={profile.role === 'admin' ? '/admin' : '/employee'} replace />
   }
 
   return children
