@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   plugins: [react()],
-  base: '/',
+  base: '/decom-robotics-employees-managment-system/',
   build: {
     rollupOptions: {
       output: {
