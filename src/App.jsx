@@ -55,8 +55,7 @@ function ProtectedRoute({ children, requiredRole }) {
 function RootRedirect() {
   const { user, profile, loading } = useAuth()
   if (loading) return <Spinner />
-  if (!user) return <Navigate to="/login" replace />
-  if (!profile) return <Spinner />
+  if (!user || !profile) return <Navigate to="/login" replace />
   if (profile.must_change_password) return <Navigate to="/setup-password" replace />
   if (profile.role === 'admin') return <Navigate to="/admin" replace />
   return <Navigate to="/employee" replace />

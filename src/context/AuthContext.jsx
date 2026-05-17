@@ -28,8 +28,8 @@ export function AuthProvider({ children }) {
 
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (!mounted) return
-      setUser(session?.user ?? null)
       if (session?.user) {
+        setUser(session.user)
         await fetchProfile(session.user.id)
       }
       setLoading(false)
@@ -37,14 +37,12 @@ export function AuthProvider({ children }) {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (!mounted) return
-      setUser(session?.user ?? null)
       if (session?.user) {
-        setLoading(true)
+        setUser(session.user)
         await fetchProfile(session.user.id)
-        setLoading(false)
       } else {
+        setUser(null)
         setProfile(null)
-        setLoading(false)
       }
     })
 
