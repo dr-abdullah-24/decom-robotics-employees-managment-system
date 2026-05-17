@@ -77,7 +77,7 @@ export default function AdminDashboard() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4">
         <StatCard icon={Users} label="Total Employees" value={stats.employees} color="bg-blue-600" sub="Active headcount" />
         <StatCard icon={UserCheck} label="Present Today" value={stats.present} color="bg-emerald-600" sub={`${attendanceRate}% attendance`} />
         <StatCard icon={CalendarDays} label="Pending Leaves" value={stats.pending_leaves} color="bg-amber-500" sub="Awaiting approval" />

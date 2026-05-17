@@ -162,7 +162,7 @@ export default function AdminEmployeeDetail() {
           <ArrowLeft size={20} />
         </Link>
         <div className="card flex-1 p-5">
-          <div className="flex items-start justify-between gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
             <div className="flex items-center gap-4">
               <div className="w-16 h-16 rounded-xl bg-blue-100 flex items-center justify-center flex-shrink-0">
                 <span className="text-blue-700 text-2xl font-bold">{employee.full_name?.charAt(0)}</span>
@@ -178,7 +178,7 @@ export default function AdminEmployeeDetail() {
                 </div>
               </div>
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-2 flex-shrink-0">
               {editing ? (
                 <>
                   <button onClick={() => setEditing(false)} className="btn-secondary flex items-center gap-1.5"><X size={14} />Cancel</button>
@@ -189,7 +189,7 @@ export default function AdminEmployeeDetail() {
                 </>
               ) : (
                 <>
-                  <button onClick={() => { setResetModal(true); setResetPassword(''); setShowResetPassword(false) }} className="btn-secondary flex items-center gap-1.5"><KeyRound size={14} />Reset Password</button>
+                  <button onClick={() => { setResetModal(true); setResetPassword(''); setShowResetPassword(false) }} className="btn-secondary flex items-center gap-1.5 text-xs sm:text-sm"><KeyRound size={14} /><span className="hidden sm:inline">Reset Password</span><span className="sm:hidden">Reset</span></button>
                   <button onClick={() => setEditing(true)} className="btn-secondary flex items-center gap-1.5"><Edit2 size={14} />Edit</button>
                 </>
               )}
@@ -197,7 +197,7 @@ export default function AdminEmployeeDetail() {
           </div>
 
           {/* Quick stats */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-5 pt-5 border-t border-gray-100">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-5 pt-5 border-t border-gray-100">
             <div className="text-center">
               <p className="text-lg font-bold text-gray-900">PKR {Number(employee.basic_salary || 0).toLocaleString()}</p>
               <p className="text-xs text-gray-500">Monthly Salary</p>
