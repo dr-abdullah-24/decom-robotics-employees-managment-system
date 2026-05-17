@@ -26,15 +26,6 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     let mounted = true
 
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      if (!mounted) return
-      if (session?.user) {
-        setUser(session.user)
-        await fetchProfile(session.user.id)
-      }
-      setLoading(false)
-    })
-
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (!mounted) return
       if (session?.user) {
@@ -44,6 +35,7 @@ export function AuthProvider({ children }) {
         setUser(null)
         setProfile(null)
       }
+      setLoading(false)
     })
 
     return () => {
