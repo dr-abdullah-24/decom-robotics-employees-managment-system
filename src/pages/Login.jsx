@@ -48,7 +48,7 @@ export default function Login() {
             alt="Decom Robotics"
             className="h-20 mx-auto mb-4 object-contain drop-shadow-lg"
           />
-          <h1 className="text-2xl font-bold text-white">Decom Robotics</h1>
+          <h1 className="text-2xl font-bold text-white">DECOM ROBOTICS LLC</h1>
           <p className="text-slate-400 text-sm mt-1">DR EMS</p>
         </div>
 
