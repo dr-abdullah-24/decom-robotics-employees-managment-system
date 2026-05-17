@@ -2,7 +2,7 @@ import { Outlet, NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import {
   LayoutDashboard, Users, Clock, CalendarDays, DollarSign,
-  LogOut, ChevronRight
+  LogOut, ChevronRight, CalendarClock
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 
@@ -12,6 +12,7 @@ const navItems = [
   { to: '/admin/attendance', label: 'Attendance', icon: Clock },
   { to: '/admin/leaves', label: 'Leave Requests', icon: CalendarDays },
   { to: '/admin/salary', label: 'Payroll', icon: DollarSign },
+  { to: '/admin/schedule', label: 'Work Schedule', icon: CalendarClock },
 ]
 
 export default function AdminLayout() {

@@ -13,9 +13,6 @@ const STATUS_STYLES = {
   leave: 'bg-purple-50 text-purple-700 border-purple-200',
 }
 
-const LATE_THRESHOLD_HOUR = 9 // After 9 AM = late
-const LATE_THRESHOLD_MIN = 15 // 9:15 AM
-
 export default function EmployeeAttendance() {
   const { profile } = useAuth()
   const [todayAtt, setTodayAtt] = useState(null)
@@ -23,6 +20,7 @@ export default function EmployeeAttendance() {
   const [loading, setLoading] = useState(true)
   const [checkLoading, setCheckLoading] = useState(false)
   const [now, setNow] = useState(new Date())
+  const [schedule, setSchedule] = useState({ check_in_time: '09:00', check_out_time: '18:00' })
   const today = format(new Date(), 'yyyy-MM-dd')
 
   useEffect(() => {
@@ -32,12 +30,24 @@ export default function EmployeeAttendance() {
   }, [profile])
 
   const fetchData = async () => {
-    const [todayRes, histRes] = await Promise.all([
+    const [todayRes, histRes, schedRes, overrideRes] = await Promise.all([
       supabase.from('attendance').select('*').eq('employee_id', profile.id).eq('date', today).maybeSingle(),
       supabase.from('attendance').select('*').eq('employee_id', profile.id).order('date', { ascending: false }).limit(20),
+      supabase.from('work_schedule').select('*').single(),
+      supabase.from('schedule_overrides').select('*').eq('date', today).maybeSingle(),
     ])
     setTodayAtt(todayRes.data)
     setHistory(histRes.data || [])
+
+    // Override takes priority over default schedule
+    if (overrideRes.data) {
+      setSchedule(overrideRes.data.is_working
+        ? { check_in_time: overrideRes.data.check_in_time || schedRes.data?.check_in_time || '09:00', check_out_time: overrideRes.data.check_out_time || schedRes.data?.check_out_time || '18:00' }
+        : { check_in_time: null, check_out_time: null, is_holiday: true })
+    } else if (schedRes.data) {
+      setSchedule(schedRes.data)
+    }
+
     setLoading(false)
   }
 
@@ -45,10 +55,14 @@ export default function EmployeeAttendance() {
     setCheckLoading(true)
     try {
       const now = new Date()
-      const hour = now.getHours()
-      const min = now.getMinutes()
-      const isLate = hour > LATE_THRESHOLD_HOUR || (hour === LATE_THRESHOLD_HOUR && min > LATE_THRESHOLD_MIN)
       const checkInTime = now.toISOString()
+
+      // Compare current time against scheduled check-in (default: 09:00)
+      const scheduledIn = schedule?.check_in_time || '09:00'
+      const [schHour, schMin] = scheduledIn.split(':').map(Number)
+      const nowMins = now.getHours() * 60 + now.getMinutes()
+      const scheduledMins = schHour * 60 + schMin
+      const isLate = nowMins > scheduledMins
 
       const { error } = await supabase.from('attendance').upsert({
         employee_id: profile.id,
@@ -121,6 +135,18 @@ export default function EmployeeAttendance() {
         <h1 className="text-2xl font-bold text-gray-900">Attendance</h1>
         <p className="text-gray-500 text-sm mt-0.5">{format(new Date(), 'EEEE, MMMM d, yyyy')}</p>
       </div>
+
+      {/* Today's schedule banner */}
+      {schedule?.is_holiday ? (
+        <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-sm text-red-700 font-medium">
+          Today is a holiday / day off — attendance not required
+        </div>
+      ) : (
+        <div className="bg-blue-50 border border-blue-200 rounded-xl px-4 py-3 flex items-center gap-2 text-sm text-blue-700">
+          <Clock size={15} />
+          <span>Today's hours: <strong>{schedule?.check_in_time?.slice(0,5) || '09:00'}</strong> – <strong>{schedule?.check_out_time?.slice(0,5) || '18:00'}</strong></span>
+        </div>
+      )}
 
       {/* Check in/out card */}
       <div className="card p-8 text-center">

@@ -245,6 +245,48 @@ CREATE TRIGGER on_auth_user_created
 
 
 -- ─────────────────────────────────────────────
+-- WORK SCHEDULE (singleton — one row for default schedule)
+-- ─────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS public.work_schedule (
+  id               UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  check_in_time    TIME NOT NULL DEFAULT '09:00',
+  check_out_time   TIME NOT NULL DEFAULT '18:00',
+  working_days     INT[] NOT NULL DEFAULT ARRAY[1,2,3,4,5],
+  updated_at       TIMESTAMPTZ DEFAULT NOW(),
+  updated_by       UUID REFERENCES public.profiles(id)
+);
+
+-- Insert the default row if it doesn't exist
+INSERT INTO public.work_schedule (check_in_time, check_out_time, working_days)
+SELECT '09:00', '18:00', ARRAY[1,2,3,4,5]
+WHERE NOT EXISTS (SELECT 1 FROM public.work_schedule);
+
+-- RLS for work_schedule
+ALTER TABLE public.work_schedule ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Anyone can read schedule" ON public.work_schedule FOR SELECT USING (true);
+CREATE POLICY "Admin can update schedule" ON public.work_schedule FOR UPDATE USING (is_admin());
+
+
+-- ─────────────────────────────────────────────
+-- SCHEDULE OVERRIDES (per-day exceptions)
+-- ─────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS public.schedule_overrides (
+  id               UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  date             DATE NOT NULL UNIQUE,
+  is_working       BOOLEAN NOT NULL DEFAULT false,
+  check_in_time    TIME,
+  check_out_time   TIME,
+  reason           TEXT,
+  created_by       UUID REFERENCES public.profiles(id),
+  created_at       TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE public.schedule_overrides ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Anyone can read overrides" ON public.schedule_overrides FOR SELECT USING (true);
+CREATE POLICY "Admin can manage overrides" ON public.schedule_overrides FOR ALL USING (is_admin());
+
+
+-- ─────────────────────────────────────────────
 -- STORAGE BUCKETS
 -- Run these separately in SQL Editor:
 -- ─────────────────────────────────────────────

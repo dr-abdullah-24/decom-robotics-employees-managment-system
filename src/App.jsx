@@ -13,6 +13,7 @@ import AdminEmployeeDetail from './pages/admin/EmployeeDetail'
 import AdminAttendance from './pages/admin/Attendance'
 import AdminLeaves from './pages/admin/Leaves'
 import AdminSalary from './pages/admin/Salary'
+import AdminSchedule from './pages/admin/Schedule'
 
 import EmployeeLayout from './components/layout/EmployeeLayout'
 import EmployeeDashboard from './pages/employee/Dashboard'
@@ -105,6 +106,7 @@ export default function App() {
             <Route path="attendance" element={<AdminAttendance />} />
             <Route path="leaves" element={<AdminLeaves />} />
             <Route path="salary" element={<AdminSalary />} />
+            <Route path="schedule" element={<AdminSchedule />} />
           </Route>
 
           <Route path="/employee" element={
