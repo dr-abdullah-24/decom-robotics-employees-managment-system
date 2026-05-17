@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { Eye, EyeOff, Lock, Mail } from 'lucide-react'
@@ -9,29 +9,18 @@ export default function Login() {
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
-  const { signIn, user, profile } = useAuth()
+  const { signIn } = useAuth()
   const navigate = useNavigate()
-
-  // Redirect if already logged in
-  useEffect(() => {
-    if (user && profile) {
-      if (profile.must_change_password) {
-        navigate('/setup-password', { replace: true })
-      } else if (profile.role === 'admin') {
-        navigate('/admin', { replace: true })
-      } else {
-        navigate('/employee', { replace: true })
-      }
-    }
-  }, [user, profile])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     if (!email || !password) return toast.error('Please fill in all fields')
     setLoading(true)
     try {
-      await signIn(email, password)
-      // useEffect above will handle navigation once profile loads
+      const { profile } = await signIn(email, password)
+      if (profile?.must_change_password) navigate('/setup-password', { replace: true })
+      else if (profile?.role === 'admin') navigate('/admin', { replace: true })
+      else navigate('/employee', { replace: true })
     } catch (err) {
       toast.error(err.message || 'Invalid email or password')
       setLoading(false)
